@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cotizador de Transporte</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --negro: #0f0f0f;
+    --gris-oscuro: #1c1c1c;
+    --gris-medio: #2e2e2e;
+    --gris-claro: #4a4a4a;
+    --acento: #f0a500;
+    --acento-hover: #ffb823;
+    --texto: #f5f5f0;
+    --texto-suave: #aaa;
+    --linea: #333;
+    --blanco: #ffffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--negro);
+    color: var(--texto);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── HEADER ── */
+  .app-header {
+    background: var(--gris-oscuro);
+    border-bottom: 3px solid var(--acento);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .app-header .truck-icon {
+    font-size: 2rem;
+    line-height: 1;
+  }
+  .app-header h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--blanco);
+  }
+  .app-header h1 span { color: var(--acento); }
+  .app-header p {
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+    font-weight: 300;
+    margin-top: 2px;
+  }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  /* ── SECCIONES DEL FORM ── */
+  .seccion {
+    background: var(--gris-oscuro);
+    border: 1px solid var(--linea);
+    border-radius: 4px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .seccion-header {
+    background: var(--gris-medio);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--linea);
+  }
+  .seccion-num {
+    background: var(--acento);
+    color: var(--negro);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    width: 24px; height: 24px;
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .seccion-titulo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--texto);
+  }
+  .seccion-body {
+    padding: 20px;
+  }
+
+  /* ── GRID ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .col-full { grid-column: 1 / -1; }
+
+  /* ── CAMPOS ── */
+  .campo { display: flex; flex-direction: column; gap: 5px; }
+  .campo label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--texto-suave);
+  }
+  .campo input,
+  .campo select,
+  .campo textarea {
+    background: var(--negro);
+    border: 1px solid var(--linea);
+    border-radius: 3px;
+    color: var(--texto);
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.92rem;
+    padding: 10px 12px;
+    transition: border-color 0.2s;
+    outline: none;
+    width: 100%;
+  }
+  .campo input:focus,
+  .campo select:focus,
+  .campo textarea:focus {
+    border-color: var(--acento);
+  }
+  .campo textarea { resize: vertical; min-height: 70px; }
+  .campo select option { background: var(--gris-oscuro); }
+
+  /* ── UNIDAD PEGADA ── */
+  .input-con-unidad {
+    display: flex;
+    align-items: center;
+    background: var(--negro);
+    border: 1px solid var(--linea);
+    border-radius: 3px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .input-con-unidad:focus-within { border-color: var(--acento); }
+  .input-con-unidad input {
+    border: none !important;
+    flex: 1;
+    border-radius: 0;
+  }
+  .unidad {
+    background: var(--gris-medio);
+    color: var(--texto-suave);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0 10px;
+    height: 100%;
+    display: flex; align-items: center;
+    border-left: 1px solid var(--linea);
+    white-space: nowrap;
+  }
+
+  /* ── VEHICULO CARDS ── */
+  .vehiculo-cards { display: flex; gap: 12px; }
+  .vehiculo-card {
+    flex: 1;
+    border: 2px solid var(--linea);
+    border-radius: 4px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .vehiculo-card:hover { border-color: var(--acento); }
+  .vehiculo-card.activo {
+    border-color: var(--acento);
+    background: rgba(240,165,0,0.08);
+  }
+  .vehiculo-card .v-icon { font-size: 1.8rem; margin-bottom: 6px; }
+  .vehiculo-card .v-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--texto);
+    text-transform: uppercase;
+  }
+  .vehiculo-card .v-cap {
+    font-size: 0.72rem;
+    color: var(--texto-suave);
+    margin-top: 2px;
+  }
+
+  /* ── TOTAL BOX ── */
+  .total-box {
+    background: var(--negro);
+    border: 2px solid var(--acento);
+    border-radius: 4px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+  }
+  .total-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--texto-suave);
+  }
+  .total-valor {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    color: var(--acento);
+    letter-spacing: 0.02em;
+  }
+
+  /* ── BOTÓN ── */
+  .btn-generar {
+    width: 100%;
+    background: var(--acento);
+    color: var(--negro);
+    border: none;
+    border-radius: 4px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 16px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 8px;
+  }
+  .btn-generar:hover { background: var(--acento-hover); }
+  .btn-generar:active { transform: scale(0.99); }
+
+  /* ── PREVIEW MODAL ── */
+  #modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #modal-overlay.visible { display: flex; }
+  #modal-box {
+    background: #fff;
+    border-radius: 6px;
+    width: 100%;
+    max-width: 640px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    padding: 16px 20px;
+    background: #f5f5f0;
+    border-top: 1px solid #ddd;
+    position: sticky;
+    bottom: 0;
+  }
+  .btn-modal {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-modal:hover { opacity: 0.85; }
+  .btn-descargar { background: #0f0f0f; color: #f0a500; }
+  .btn-cerrar { background: #ddd; color: #333; }
+
+  /* ── COTIZACIÓN (preview) ── */
+  #cotizacion-preview {
+    padding: 40px;
+    color: #1a1a1a;
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+  }
+
+  .cot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 18px;
+    border-bottom: 3px solid #0f0f0f;
+    margin-bottom: 22px;
+  }
+  .cot-empresa-nombre {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 1.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #0f0f0f;
+    line-height: 1.1;
+  }
+  .cot-empresa-nombre span { color: #f0a500; }
+  .cot-empresa-sub {
+    font-size: 0.72rem;
+    color: #666;
+    margin-top: 4px;
+    font-weight: 400;
+  }
+  .cot-badge {
+    background: #0f0f0f;
+    color: #f0a500;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 8px 14px;
+    border-radius: 3px;
+    text-align: right;
+  }
+  .cot-badge .num {
+    font-size: 1.3rem;
+    display: block;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+
+  .cot-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .cot-meta-box {
+    background: #f7f7f5;
+    border-radius: 3px;
+    padding: 12px 14px;
+    border-left: 3px solid #f0a500;
+  }
+  .cot-meta-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #999;
+    margin-bottom: 3px;
+  }
+  .cot-meta-valor {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #1a1a1a;
+  }
+
+  .cot-seccion-titulo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #999;
+    margin: 18px 0 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  .cot-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+  }
+  .cot-tabla thead tr {
+    background: #0f0f0f;
+    color: #f5f5f0;
+  }
+  .cot-tabla thead th {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 8px 12px;
+    text-align: left;
+  }
+  .cot-tabla tbody tr { border-bottom: 1px solid #eee; }
+  .cot-tabla tbody tr:nth-child(even) { background: #fafaf8; }
+  .cot-tabla tbody td {
+    padding: 9px 12px;
+    font-size: 0.85rem;
+    vertical-align: top;
+  }
+  .td-monto {
+    text-align: right;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .cot-total-row {
+    background: #0f0f0f;
+    color: #f0a500;
+  }
+  .cot-total-row td {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 11px 12px !important;
+  }
+
+  .cot-condiciones {
+    background: #f7f7f5;
+    border-radius: 3px;
+    padding: 12px 14px;
+    margin-top: 16px;
+  }
+  .cot-condiciones p {
+    font-size: 0.78rem;
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 3px;
+  }
+
+  .cot-footer {
+    margin-top: 24px;
+    padding-top: 14px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .cot-contacto p {
+    font-size: 0.75rem;
+    color: #666;
+    line-height: 1.7;
+  }
+  .cot-contacto strong {
+    color: #0f0f0f;
+    font-weight: 600;
+  }
+  .cot-firma {
+    text-align: right;
+  }
+  .cot-firma .linea-firma {
+    width: 140px;
+    border-top: 1px solid #999;
+    margin-bottom: 4px;
+    margin-left: auto;
+  }
+  .cot-firma p {
+    font-size: 0.7rem;
+    color: #888;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .vehiculo-cards { flex-direction: column; }
+    .app-header { padding: 16px 20px; }
+    #cotizacion-preview { padding: 24px; }
+    .cot-meta { grid-template-columns: 1fr; }
+    .cot-header { flex-direction: column; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="truck-icon">🚛</div>
+  <div>
+    <h1>Cotizador de <span>Transporte</span></h1>
+    <p>Genera cotizaciones profesionales en segundos</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- SECCIÓN 1: EMPRESA -->
+  <div class="seccion">
+    <div class="seccion-header">
+      <div class="seccion-num">1</div>
+      <div class="seccion-titulo">Datos de tu empresa</div>
+    </div>
+    <div class="seccion-body">
+      <div class="grid-2">
+        <div class="campo col-full">
+          <label>Nombre de la empresa / transportista</label>
+          <input type="text" id="emp-nombre" placeholder="Ej. Transportes García" />
+        </div>
+        <div class="campo">
+          <label>Teléfono / WhatsApp</label>
+          <input type="text" id="emp-tel" placeholder="Ej. 33 1234 5678" />
+        </div>
+        <div class="campo">
+          <label>Ciudad base</label>
+          <input type="text" id="emp-ciudad" placeholder="Ej. Guadalajara, Jal." />
+        </div>
+        <div class="campo col-full">
+          <label>Correo electrónico (opcional)</label>
+          <input type="text" id="emp-email" placeholder="Ej. contacto@transportes.com" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 2: CLIENTE -->
+  <div class="seccion">
+    <div class="seccion-header">
+      <div class="seccion-num">2</div>
+      <div class="seccion-titulo">Datos del cliente</div>
+    </div>
+    <div class="seccion-body">
+      <div class="grid-2">
+        <div class="campo">
+          <label>Nombre del cliente / empresa</label>
+          <input type="text" id="cli-nombre" placeholder="Ej. Sr. Martínez / Empresa XYZ" />
+        </div>
+        <div class="campo">
+          <label>Teléfono del cliente</label>
+          <input type="text" id="cli-tel" placeholder="Ej. 33 9876 5432" />
+        </div>
+        <div class="campo">
+          <label>Fecha de solicitud</label>
+          <input type="date" id="cli-fecha" />
+        </div>
+        <div class="campo">
+          <label>Fecha estimada del servicio</label>
+          <input type="date" id="cli-fecha-servicio" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 3: VEHÍCULO -->
+  <div class="seccion">
+    <div class="seccion-header">
+      <div class="seccion-num">3</div>
+      <div class="seccion-titulo">Unidad a utilizar</div>
+    </div>
+    <div class="seccion-body">
+      <div class="vehiculo-cards">
+        <div class="vehiculo-card activo" onclick="seleccionarVehiculo(this, 'Nissan NP300 – Caja Seca', '1.5 ton')">
+          <div class="v-icon">🚐</div>
+          <div class="v-name">NP300</div>
+          <div class="v-cap">Nissan NP300 · Caja Seca · ~1.5 ton</div>
+        </div>
+        <div class="vehiculo-card" onclick="seleccionarVehiculo(this, 'Ford Super Duty 5 Ton – Caja Seca', '5 ton')">
+          <div class="v-icon">🚚</div>
+          <div class="v-name">Super Duty 5 Ton</div>
+          <div class="v-cap">Ford Super Duty · Caja Seca · 5 ton</div>
+        </div>
+      </div>
+      <input type="hidden" id="vehiculo-sel" value="Nissan NP300 – Caja Seca" />
+      <input type="hidden" id="vehiculo-cap" value="1.5 ton" />
+    </div>
+  </div>
+
+  <!-- SECCIÓN 4: SERVICIO -->
+  <div class="seccion">
+    <div class="seccion-header">
+      <div class="seccion-num">4</div>
+      <div class="seccion-titulo">Detalle del flete</div>
+    </div>
+    <div class="seccion-body">
+      <div class="grid-2">
+        <div class="campo">
+          <label>Punto de origen</label>
+          <input type="text" id="srv-origen" placeholder="Ej. Col. Oblatos, Guadalajara" />
+        </div>
+        <div class="campo">
+          <label>Punto de destino</label>
+          <input type="text" id="srv-destino" placeholder="Ej. Zapopan Centro" />
+        </div>
+        <div class="campo">
+          <label>Distancia aproximada (km)</label>
+          <div class="input-con-unidad">
+            <input type="number" id="srv-km" placeholder="0" min="0" />
+            <span class="unidad">km</span>
+          </div>
+        </div>
+        <div class="campo">
+          <label>Tipo de carga</label>
+          <input type="text" id="srv-carga" placeholder="Ej. Muebles, mercancía, herramienta..." />
+        </div>
+        <div class="campo col-full">
+          <label>Descripción adicional del servicio</label>
+          <textarea id="srv-desc" placeholder="Ej. Incluye subida y bajada de carga, acceso por escaleras, etc."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 5: PRECIO -->
+  <div class="seccion">
+    <div class="seccion-header">
+      <div class="seccion-num">5</div>
+      <div class="seccion-titulo">Precio y condiciones</div>
+    </div>
+    <div class="seccion-body">
+      <div class="grid-3">
+        <div class="campo">
+          <label>Costo del flete</label>
+          <div class="input-con-unidad">
+            <input type="number" id="precio-flete" placeholder="0" min="0" oninput="calcularTotal()" />
+            <span class="unidad">MXN</span>
+          </div>
+        </div>
+        <div class="campo">
+          <label>Cargadores (si aplica)</label>
+          <div class="input-con-unidad">
+            <input type="number" id="precio-cargadores" placeholder="0" min="0" oninput="calcularTotal()" />
+            <span class="unidad">MXN</span>
+          </div>
+        </div>
+        <div class="campo">
+          <label>Casetas / peajes</label>
+          <div class="input-con-unidad">
+            <input type="number" id="precio-casetas" placeholder="0" min="0" oninput="calcularTotal()" />
+            <span class="unidad">MXN</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="total-box" style="margin-top:16px">
+        <span class="total-label">Total de la cotización</span>
+        <span class="total-valor" id="total-display">$0</span>
+      </div>
+
+      <div class="campo" style="margin-top:14px">
+        <label>Condiciones de pago</label>
+        <select id="condiciones-pago">
+          <option value="50% anticipo, 50% al entregar">50% anticipo, 50% al entregar</option>
+          <option value="Pago total al entregar">Pago total al entregar</option>
+          <option value="Pago total por adelantado">Pago total por adelantado</option>
+          <option value="Pago a crédito (acordar plazo)">Pago a crédito (acordar plazo)</option>
+        </select>
+      </div>
+
+      <div class="campo" style="margin-top:12px">
+        <label>Vigencia de la cotización</label>
+        <select id="vigencia">
+          <option value="3 días hábiles">3 días hábiles</option>
+          <option value="5 días hábiles">5 días hábiles</option>
+          <option value="7 días hábiles">7 días hábiles</option>
+          <option value="15 días hábiles">15 días hábiles</option>
+        </select>
+      </div>
+
+      <div class="campo" style="margin-top:12px">
+        <label>Notas / condiciones adicionales (opcional)</label>
+        <textarea id="notas" placeholder="Ej. Precio no incluye empaque. El cliente debe tener acceso libre para la unidad."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-generar" onclick="generarCotizacion()">
+    📄 Generar Cotización PDF
+  </button>
+
+</div>
+
+<!-- MODAL PREVIEW -->
+<div id="modal-overlay">
+  <div id="modal-box">
+    <div id="cotizacion-preview"></div>
+    <div class="modal-actions">
+      <button class="btn-modal btn-descargar" onclick="descargarPDF()">⬇ Descargar PDF</button>
+      <button class="btn-modal btn-cerrar" onclick="cerrarModal()">✕ Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Fecha de hoy por defecto
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('cli-fecha').value = hoy;
+
+  function seleccionarVehiculo(el, nombre, cap) {
+    document.querySelectorAll('.vehiculo-card').forEach(c => c.classList.remove('activo'));
+    el.classList.add('activo');
+    document.getElementById('vehiculo-sel').value = nombre;
+    document.getElementById('vehiculo-cap').value = cap;
+  }
+
+  function calcularTotal() {
+    const f = parseFloat(document.getElementById('precio-flete').value) || 0;
+    const c = parseFloat(document.getElementById('precio-cargadores').value) || 0;
+    const k = parseFloat(document.getElementById('precio-casetas').value) || 0;
+    const total = f + c + k;
+    document.getElementById('total-display').textContent = '$' + total.toLocaleString('es-MX', {minimumFractionDigits: 2});
+    return total;
+  }
+
+  function fmtFecha(str) {
+    if (!str) return '—';
+    const [y, m, d] = str.split('-');
+    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    return `${d} ${meses[parseInt(m)-1]} ${y}`;
+  }
+
+  function fmtMXN(n) {
+    return '$' + (parseFloat(n)||0).toLocaleString('es-MX', {minimumFractionDigits: 2});
+  }
+
+  function genFolio() {
+    const d = new Date();
+    return 'COT-' + String(d.getFullYear()).slice(2) +
+           String(d.getMonth()+1).padStart(2,'0') +
+           String(d.getDate()).padStart(2,'0') + '-' +
+           String(Math.floor(Math.random()*900)+100);
+  }
+
+  let folioActual = '';
+
+  function generarCotizacion() {
+    const empNombre = document.getElementById('emp-nombre').value || 'Transportes';
+    const empTel    = document.getElementById('emp-tel').value || '';
+    const empCiudad = document.getElementById('emp-ciudad').value || '';
+    const empEmail  = document.getElementById('emp-email').value || '';
+    const cliNombre = document.getElementById('cli-nombre').value || 'Cliente';
+    const cliTel    = document.getElementById('cli-tel').value || '';
+    const cliFecha  = document.getElementById('cli-fecha').value;
+    const cliFechaServ = document.getElementById('cli-fecha-servicio').value;
+    const vehiculo  = document.getElementById('vehiculo-sel').value;
+    const cap       = document.getElementById('vehiculo-cap').value;
+    const origen    = document.getElementById('srv-origen').value || '—';
+    const destino   = document.getElementById('srv-destino').value || '—';
+    const km        = document.getElementById('srv-km').value || '';
+    const carga     = document.getElementById('srv-carga').value || '';
+    const desc      = document.getElementById('srv-desc').value || '';
+    const pflete    = parseFloat(document.getElementById('precio-flete').value)||0;
+    const pcarg     = parseFloat(document.getElementById('precio-cargadores').value)||0;
+    const pcas      = parseFloat(document.getElementById('precio-casetas').value)||0;
+    const total     = pflete + pcarg + pcas;
+    const condPago  = document.getElementById('condiciones-pago').value;
+    const vigencia  = document.getElementById('vigencia').value;
+    const notas     = document.getElementById('notas').value || '';
+    folioActual     = genFolio();
+
+    // Filas de la tabla de precios
+    let filasPrecios = '';
+    if (pflete > 0) filasPrecios += `
+      <tr>
+        <td>Servicio de flete – ${origen} → ${destino}${km ? ' ('+km+' km aprox.)' : ''}</td>
+        <td class="td-monto">${fmtMXN(pflete)}</td>
+      </tr>`;
+    if (pcarg > 0) filasPrecios += `
+      <tr>
+        <td>Servicio de cargadores</td>
+        <td class="td-monto">${fmtMXN(pcarg)}</td>
+      </tr>`;
+    if (pcas > 0) filasPrecios += `
+      <tr>
+        <td>Casetas / peajes estimados</td>
+        <td class="td-monto">${fmtMXN(pcas)}</td>
+      </tr>`;
+    if (!filasPrecios) filasPrecios = `<tr><td colspan="2" style="color:#999; font-style:italic">Sin conceptos capturados</td></tr>`;
+
+    const html = `
+      <div class="cot-header">
+        <div>
+          <div class="cot-empresa-nombre">${empNombre}</div>
+          <div class="cot-empresa-sub">Transporte de carga · Caja seca</div>
+        </div>
+        <div class="cot-badge">
+          COTIZACIÓN
+          <span class="num">${folioActual}</span>
+        </div>
+      </div>
+
+      <div class="cot-meta">
+        <div class="cot-meta-box">
+          <div class="cot-meta-label">Cliente</div>
+          <div class="cot-meta-valor">${cliNombre}</div>
+          ${cliTel ? `<div style="font-size:0.78rem;color:#666;margin-top:2px">${cliTel}</div>` : ''}
+        </div>
+        <div class="cot-meta-box">
+          <div class="cot-meta-label">Fecha de cotización</div>
+          <div class="cot-meta-valor">${fmtFecha(cliFecha)}</div>
+          ${cliFechaServ ? `<div style="font-size:0.78rem;color:#666;margin-top:2px">Servicio: ${fmtFecha(cliFechaServ)}</div>` : ''}
+        </div>
+        <div class="cot-meta-box">
+          <div class="cot-meta-label">Unidad asignada</div>
+          <div class="cot-meta-valor">${vehiculo}</div>
+          <div style="font-size:0.78rem;color:#666;margin-top:2px">Capacidad: ${cap}</div>
+        </div>
+        <div class="cot-meta-box">
+          <div class="cot-meta-label">Ruta</div>
+          <div class="cot-meta-valor">${origen}</div>
+          <div style="font-size:0.78rem;color:#666;margin-top:2px">→ ${destino}</div>
+        </div>
+      </div>
+
+      ${(carga || desc) ? `
+      <div class="cot-seccion-titulo">Descripción del servicio</div>
+      <table class="cot-tabla">
+        <thead><tr>
+          <th>Detalle</th>
+        </tr></thead>
+        <tbody>
+          ${carga ? `<tr><td><strong>Tipo de carga:</strong> ${carga}</td></tr>` : ''}
+          ${desc  ? `<tr><td>${desc}</td></tr>` : ''}
+        </tbody>
+      </table>` : ''}
+
+      <div class="cot-seccion-titulo">Desglose de costos</div>
+      <table class="cot-tabla">
+        <thead><tr>
+          <th style="width:75%">Concepto</th>
+          <th style="width:25%; text-align:right">Monto</th>
+        </tr></thead>
+        <tbody>
+          ${filasPrecios}
+          <tr class="cot-total-row">
+            <td>TOTAL</td>
+            <td class="td-monto">${fmtMXN(total)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="cot-condiciones">
+        <p><strong>Condiciones de pago:</strong> ${condPago}</p>
+        <p><strong>Vigencia de esta cotización:</strong> ${vigencia} a partir de la fecha de emisión</p>
+        ${notas ? `<p style="margin-top:6px; color:#444">${notas}</p>` : ''}
+      </div>
+
+      <div class="cot-footer">
+        <div class="cot-contacto">
+          <p><strong>${empNombre}</strong></p>
+          ${empTel    ? `<p>📞 ${empTel}</p>` : ''}
+          ${empEmail  ? `<p>✉ ${empEmail}</p>` : ''}
+          ${empCiudad ? `<p>📍 ${empCiudad}</p>` : ''}
+        </div>
+        <div class="cot-firma">
+          <div class="linea-firma"></div>
+          <p>Firma / Autorización</p>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('cotizacion-preview').innerHTML = html;
+    document.getElementById('modal-overlay').classList.add('visible');
+  }
+
+  function cerrarModal() {
+    document.getElementById('modal-overlay').classList.remove('visible');
+  }
+
+  async function descargarPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+    const el = document.getElementById('cotizacion-preview');
+
+    await doc.html(el, {
+      callback: function(d) {
+        d.save(`Cotizacion-${folioActual}.pdf`);
+      },
+      x: 30,
+      y: 20,
+      width: 552,
+      windowWidth: 640,
+      autoPaging: 'text',
+    });
+  }
+
+  // Cerrar modal al hacer click fuera
+  document.getElementById('modal-overlay').addEventListener('click', function(e) {
+    if (e.target === this) cerrarModal();
+  });
+</script>
+</body>
+</html>
