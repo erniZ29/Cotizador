@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fletes y Mudanzas Perez</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --negro: #0f0f0f;
+  --gris-oscuro: #1a1a1a;
+  --gris-medio: #252525;
+  --gris-claro: #333;
+  --acento: #f0a500;
+  --acento-hover: #ffb823;
+  --texto: #f0f0eb;
+  --texto-suave: #888;
+  --linea: #2e2e2e;
+  --verde: #27ae60;
+  --azul: #2980b9;
+  --rojo: #e74c3c;
+  --morado: #8e44ad;
+  --naranja: #e67e22;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Barlow',sans-serif;background:var(--negro);color:var(--texto);overflow:hidden}
+
+/* ── APP SHELL ── */
+.app{display:flex;flex-direction:column;height:100vh}
+
+/* ── HEADER ── */
+.topbar{background:var(--gris-oscuro);border-bottom:2px solid var(--acento);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.2rem;text-transform:uppercase;letter-spacing:.04em}
+.topbar-title span{color:var(--acento)}
+.topbar-sub{font-size:.7rem;color:var(--texto-suave);margin-top:1px}
+.btn-config{background:none;border:1px solid var(--linea);color:var(--texto-suave);border-radius:3px;padding:6px 11px;font-size:.78rem;cursor:pointer;transition:all .2s;font-family:'Barlow',sans-serif}
+.btn-config:hover{border-color:var(--acento);color:var(--acento)}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding-bottom:70px}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--gris-oscuro);border-top:2px solid var(--linea);display:flex;z-index:50}
+.nav-btn{flex:1;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:none;color:var(--texto-suave);font-family:'Barlow',sans-serif;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;transition:color .2s}
+.nav-btn.activo{color:var(--acento)}
+.nav-btn .nav-icon{font-size:1.2rem;line-height:1}
+
+/* ── PÁGINAS ── */
+.page{display:none;padding:16px}
+.page.activa{display:block}
+
+/* ── CARDS ── */
+.card{background:var(--gris-oscuro);border:1px solid var(--linea);border-radius:6px;overflow:hidden;margin-bottom:12px}
+.card-header{background:var(--gris-medio);padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--linea)}
+.card-titulo{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.06em}
+.card-body{padding:14px}
+
+/* ── STATS GRID ── */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat-box{background:var(--gris-oscuro);border:1px solid var(--linea);border-radius:5px;padding:12px 14px}
+.stat-label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--texto-suave);margin-bottom:4px}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.5rem;color:var(--acento)}
+.stat-sub{font-size:.68rem;color:var(--texto-suave);margin-top:2px}
+
+/* ── LISTA COTIZACIONES ── */
+.cot-item{background:var(--gris-oscuro);border:1px solid var(--linea);border-radius:5px;margin-bottom:8px;overflow:hidden;cursor:pointer;transition:border-color .2s}
+.cot-item:hover{border-color:var(--acento)}
+.cot-item-header{padding:10px 13px;display:flex;justify-content:space-between;align-items:flex-start}
+.cot-item-left .cot-folio{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;color:var(--acento);letter-spacing:.04em}
+.cot-item-left .cot-cliente{font-weight:600;font-size:.92rem;margin-top:1px}
+.cot-item-left .cot-ruta{font-size:.73rem;color:var(--texto-suave);margin-top:2px}
+.cot-item-right{text-align:right;flex-shrink:0;margin-left:10px}
+.cot-monto{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem;color:var(--texto)}
+.cot-fecha{font-size:.68rem;color:var(--texto-suave);margin-top:2px}
+.cot-item-footer{padding:6px 13px 8px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--linea)}
+.badge-tipo{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:2px;background:rgba(240,165,0,.15);color:var(--acento)}
+.badge-status{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:10px}
+.s-pendiente{background:rgba(255,165,0,.15);color:#f0a500}
+.s-confirmado{background:rgba(41,128,185,.15);color:#5dade2}
+.s-en-camino{background:rgba(230,126,34,.15);color:#e67e22}
+.s-entregado{background:rgba(39,174,96,.15);color:#2ecc71}
+.s-cancelado{background:rgba(231,76,60,.15);color:#e74c3c}
+
+/* ── FILTROS ── */
+.filtros{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px}
+.filtro-btn{flex-shrink:0;background:var(--gris-medio);border:1px solid var(--linea);color:var(--texto-suave);border-radius:20px;padding:5px 12px;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;transition:all .2s;font-family:'Barlow',sans-serif}
+.filtro-btn.activo{background:var(--acento);border-color:var(--acento);color:var(--negro)}
+
+/* ── FORMULARIO COTIZADOR ── */
+.seccion-form{background:var(--gris-oscuro);border:1px solid var(--linea);border-radius:5px;margin-bottom:12px;overflow:hidden}
+.seccion-form-header{background:var(--gris-medio);padding:9px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--linea)}
+.sf-num{background:var(--acento);color:var(--negro);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.75rem;width:20px;height:20px;border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sf-titulo{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.88rem;text-transform:uppercase;letter-spacing:.05em}
+.seccion-form-body{padding:13px 14px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.col-full{grid-column:1/-1}
+.campo{display:flex;flex-direction:column;gap:4px}
+.campo label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--texto-suave)}
+.campo input,.campo select,.campo textarea{background:#111;border:1px solid var(--linea);border-radius:3px;color:var(--texto);font-family:'Barlow',sans-serif;font-size:.88rem;padding:8px 10px;outline:none;width:100%;transition:border-color .2s}
+.campo input:focus,.campo select:focus,.campo textarea:focus{border-color:var(--acento)}
+.campo textarea{resize:vertical;min-height:55px}
+.campo select option{background:var(--gris-oscuro)}
+.input-u{display:flex;align-items:center;background:#111;border:1px solid var(--linea);border-radius:3px;overflow:hidden;transition:border-color .2s}
+.input-u:focus-within{border-color:var(--acento)}
+.input-u input{border:none!important;flex:1}
+.unidad{background:var(--gris-medio);color:var(--texto-suave);font-size:.72rem;font-weight:600;padding:0 8px;height:100%;display:flex;align-items:center;border-left:1px solid var(--linea);white-space:nowrap}
+
+/* TIPO SELECTOR */
+.tipo-selector{display:flex;gap:0;margin-bottom:14px;border-radius:4px;overflow:hidden;border:2px solid var(--acento)}
+.tipo-btn{flex:1;padding:11px;text-align:center;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;text-transform:uppercase;letter-spacing:.05em;background:var(--gris-oscuro);color:var(--texto-suave);transition:all .2s;border:none}
+.tipo-btn.activo{background:var(--acento);color:var(--negro)}
+.tipo-btn .tipo-icon{font-size:1.1rem;display:block;margin-bottom:1px}
+
+/* VEHICULO */
+.vehiculo-cards{display:flex;gap:8px;margin-bottom:0}
+.vc{flex:1;border:2px solid var(--linea);border-radius:4px;padding:10px;cursor:pointer;transition:all .2s;text-align:center}
+.vc:hover{border-color:var(--acento)}
+.vc.activo{border-color:var(--acento);background:rgba(240,165,0,.08)}
+.vc .vi{font-size:1.4rem;margin-bottom:3px}
+.vc .vn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;text-transform:uppercase}
+.vc .vk{font-size:.67rem;color:var(--texto-suave);margin-top:1px}
+
+/* CALC BOX */
+.calc-box{background:#111;border:1px solid var(--linea);border-radius:4px;padding:12px 14px;margin-top:10px}
+.calc-titulo{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--texto-suave);margin-bottom:8px}
+.calc-fila{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:.79rem;color:var(--texto-suave);border-bottom:1px solid #1e1e1e}
+.calc-fila:last-of-type{border-bottom:none}
+.calc-fila .cv{color:var(--texto);font-weight:600}
+.calc-sug{margin-top:8px;padding:9px 12px;background:rgba(240,165,0,.1);border:1px solid var(--acento);border-radius:3px;display:flex;justify-content:space-between;align-items:center}
+.cs-label{font-size:.72rem;color:var(--texto-suave)}
+.cs-val{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.2rem;color:var(--acento)}
+.btn-usar{display:block;width:100%;margin-top:7px;background:rgba(240,165,0,.15);border:1px solid var(--acento);color:var(--acento);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;padding:7px;border-radius:3px;cursor:pointer;transition:background .2s}
+.btn-usar:hover{background:rgba(240,165,0,.25)}
+
+/* TOTAL BOX */
+.total-box{background:#111;border:2px solid var(--acento);border-radius:4px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.total-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;color:var(--texto-suave)}
+.total-valor{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.7rem;color:var(--acento)}
+
+/* BTN GENERAR */
+.btn-generar{width:100%;background:var(--acento);color:var(--negro);border:none;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1rem;text-transform:uppercase;letter-spacing:.08em;padding:13px;cursor:pointer;transition:background .2s;margin-top:8px}
+.btn-generar:hover{background:var(--acento-hover)}
+
+/* CONFIG PANEL */
+.config-panel{display:none;background:#0a0a0a;border-bottom:2px solid var(--acento);padding:16px 18px}
+.config-panel.visible{display:block}
+.cfg-titulo{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.08em;color:var(--acento);margin-bottom:12px}
+.cfg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.cfg-campo label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--texto-suave);display:block;margin-bottom:3px}
+.cfg-campo input{background:var(--gris-medio);border:1px solid var(--linea);border-radius:3px;color:var(--texto);font-family:'Barlow',sans-serif;font-size:.88rem;padding:7px 9px;width:100%;outline:none}
+.cfg-campo input:focus{border-color:var(--acento)}
+.cfg-nota{font-size:.68rem;color:var(--texto-suave);margin-top:10px;font-style:italic}
+
+/* MODAL */
+#modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:200;align-items:center;justify-content:center;padding:14px}
+#modal-overlay.visible{display:flex}
+#modal-box{background:#fff;border-radius:6px;width:100%;max-width:620px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal-actions{display:flex;gap:8px;padding:12px 16px;background:#f5f5f0;border-top:1px solid #ddd;position:sticky;bottom:0}
+.btn-modal{flex:1;padding:11px;border:none;border-radius:3px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer}
+.btn-descargar{background:#0f0f0f;color:#f0a500}
+.btn-cerrar{background:#ddd;color:#333}
+
+/* MODAL DETALLE */
+#modal-detalle{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:200;align-items:flex-end;justify-content:center;padding:0}
+#modal-detalle.visible{display:flex}
+#detalle-box{background:var(--gris-oscuro);border-radius:12px 12px 0 0;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;padding:20px}
+.det-titulo{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.det-folio{font-size:.72rem;color:var(--acento);margin-bottom:14px}
+.det-fila{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--linea);font-size:.85rem}
+.det-fila:last-of-type{border-bottom:none}
+.det-key{color:var(--texto-suave)}
+.det-val{font-weight:600;text-align:right;max-width:60%}
+.status-selector{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.ss-btn{padding:9px;border-radius:4px;border:2px solid transparent;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;text-align:center;transition:all .2s;background:var(--gris-medio);color:var(--texto-suave)}
+.ss-btn:hover{opacity:.8}
+.ss-btn.sel-pendiente{border-color:#f0a500;color:#f0a500;background:rgba(240,165,0,.1)}
+.ss-btn.sel-confirmado{border-color:#5dade2;color:#5dade2;background:rgba(41,128,185,.1)}
+.ss-btn.sel-en-camino{border-color:#e67e22;color:#e67e22;background:rgba(230,126,34,.1)}
+.ss-btn.sel-entregado{border-color:#2ecc71;color:#2ecc71;background:rgba(39,174,96,.1)}
+.ss-btn.sel-cancelado{border-color:#e74c3c;color:#e74c3c;background:rgba(231,76,60,.1)}
+.btn-det-pdf{width:100%;background:var(--acento);color:var(--negro);border:none;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.95rem;text-transform:uppercase;letter-spacing:.08em;padding:12px;cursor:pointer;margin-top:4px}
+.btn-det-cerrar{width:100%;background:var(--gris-medio);color:var(--texto-suave);border:1px solid var(--linea);border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.88rem;text-transform:uppercase;letter-spacing:.06em;padding:10px;cursor:pointer;margin-top:8px}
+.btn-det-eliminar{width:100%;background:rgba(231,76,60,.1);color:#e74c3c;border:1px solid rgba(231,76,60,.3);border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;padding:8px;cursor:pointer;margin-top:6px}
+
+/* AGENDA */
+.agenda-dia{margin-bottom:16px}
+.agenda-fecha-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.08em;color:var(--texto-suave);margin-bottom:6px;padding-left:2px}
+.agenda-fecha-label.hoy{color:var(--acento)}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:40px 20px;color:var(--texto-suave)}
+.empty-icon{font-size:2.5rem;margin-bottom:10px}
+.empty-txt{font-size:.88rem}
+
+/* COTIZACIÓN PDF */
+#cotizacion-preview{padding:34px;color:#1a1a1a;font-family:'Barlow',sans-serif;font-size:13px}
+.cp-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:14px;border-bottom:3px solid #0f0f0f;margin-bottom:18px}
+.cp-nombre{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.5rem;text-transform:uppercase;letter-spacing:.04em;color:#0f0f0f;line-height:1.1}
+.cp-sub{font-size:.68rem;color:#666;margin-top:3px}
+.cp-tipo{display:inline-block;background:#f0a500;color:#0f0f0f;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.67rem;text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;border-radius:2px;margin-top:4px}
+.cp-badge{background:#0f0f0f;color:#f0a500;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;padding:7px 12px;border-radius:3px;text-align:right}
+.cp-badge .num{font-size:1.1rem;display:block;margin-top:2px}
+.cp-meta{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px}
+.cp-meta-box{background:#f7f7f5;border-radius:3px;padding:9px 12px;border-left:3px solid #f0a500}
+.cp-meta-label{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#999;margin-bottom:2px}
+.cp-meta-valor{font-weight:600;font-size:.84rem;color:#1a1a1a}
+.cp-sec-titulo{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:#999;margin:14px 0 6px;padding-bottom:3px;border-bottom:1px solid #e5e5e5}
+.cp-tabla{width:100%;border-collapse:collapse;margin-bottom:12px}
+.cp-tabla thead tr{background:#0f0f0f;color:#f5f5f0}
+.cp-tabla thead th{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;padding:6px 10px;text-align:left}
+.cp-tabla tbody tr{border-bottom:1px solid #eee}
+.cp-tabla tbody tr:nth-child(even){background:#fafaf8}
+.cp-tabla tbody td{padding:7px 10px;font-size:.8rem;vertical-align:top}
+.td-r{text-align:right;font-weight:600;white-space:nowrap}
+.cp-total{background:#0f0f0f;color:#f0a500}
+.cp-total td{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.95rem;text-transform:uppercase;letter-spacing:.05em;padding:9px 10px!important}
+.cp-cond{background:#f7f7f5;border-radius:3px;padding:10px 12px;margin-top:12px}
+.cp-cond p{font-size:.73rem;color:#555;line-height:1.5;margin-bottom:2px}
+.cp-footer{margin-top:18px;padding-top:10px;border-top:1px solid #ddd;display:flex;justify-content:space-between;align-items:flex-end}
+.cp-contacto p{font-size:.7rem;color:#666;line-height:1.7}
+.cp-contacto strong{color:#0f0f0f;font-weight:600}
+.cp-firma{text-align:right}
+.cp-linea{width:120px;border-top:1px solid #999;margin-bottom:3px;margin-left:auto}
+.cp-firma p{font-size:.65rem;color:#888}
+
+@media(max-width:480px){
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .vehiculo-cards{flex-direction:column}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .cp-meta{grid-template-columns:1fr}
+  .cp-header{flex-direction:column;gap:8px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div>
+    <div class="topbar-title">🚛 Fletes y Mudanzas <span>Perez</span></div>
+    <div class="topbar-sub">Guadalajara · 3319153280</div>
+  </div>
+  <button class="btn-config" onclick="toggleConfig()">⚙️ Tarifas</button>
+</div>
+
+<!-- CONFIG PANEL -->
+<div class="config-panel" id="config-panel">
+  <div class="cfg-titulo">⚙️ Tarifas — solo tú las ves</div>
+  <div class="cfg-grid">
+    <div class="cfg-campo"><label>NP300 $/km</label><input type="number" id="cfg-np300" value="13" min="1" oninput="recalcular()"></div>
+    <div class="cfg-campo"><label>Super Duty $/km</label><input type="number" id="cfg-sd" value="20" min="1" oninput="recalcular()"></div>
+    <div class="cfg-campo"><label>Mínimo flete $</label><input type="number" id="cfg-min" value="350" min="0" oninput="recalcular()"></div>
+    <div class="cfg-campo"><label>Cargador $/hora</label><input type="number" id="cfg-carg" value="120" min="0" oninput="recalcular()"></div>
+    <div class="cfg-campo"><label>Margen %</label><input type="number" id="cfg-margen" value="30" min="0" max="100" oninput="recalcular()"></div>
+  </div>
+  <p class="cfg-nota">💡 El cliente nunca verá estos datos.</p>
+</div>
+
+<!-- CONTENT -->
+<div class="content" id="content">
+
+<!-- ════════════════ INICIO ════════════════ -->
+<div class="page activa" id="page-inicio">
+  <div id="resumen-stats" style="margin-bottom:0"></div>
+  <div style="margin-top:12px">
+    <div class="card-header" style="background:var(--gris-medio);border-radius:5px 5px 0 0;border:1px solid var(--linea);border-bottom:none;padding:9px 14px">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.06em">📅 Próximos servicios</span>
+    </div>
+    <div id="proximos-lista" style="border:1px solid var(--linea);border-top:none;border-radius:0 0 5px 5px;overflow:hidden"></div>
+  </div>
+  <div style="margin-top:12px">
+    <div class="card-header" style="background:var(--gris-medio);border-radius:5px 5px 0 0;border:1px solid var(--linea);border-bottom:none;padding:9px 14px">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.06em">🕐 Recientes</span>
+    </div>
+    <div id="recientes-lista" style="border:1px solid var(--linea);border-top:none;border-radius:0 0 5px 5px;overflow:hidden"></div>
+  </div>
+</div>
+
+<!-- ════════════════ NUEVA COTIZACIÓN ════════════════ -->
+<div class="page" id="page-nueva">
+  <div class="tipo-selector">
+    <button class="tipo-btn activo" id="btn-flete" onclick="setTipo('flete')"><span class="tipo-icon">📦</span>Flete</button>
+    <button class="tipo-btn" id="btn-mudanza" onclick="setTipo('mudanza')"><span class="tipo-icon">🏠</span>Mudanza</button>
+  </div>
+
+  <!-- CLIENTE -->
+  <div class="seccion-form">
+    <div class="seccion-form-header"><div class="sf-num">1</div><div class="sf-titulo">Datos del cliente</div></div>
+    <div class="seccion-form-body">
+      <div class="grid-2">
+        <div class="campo"><label>Nombre / Empresa</label><input type="text" id="cli-nombre" placeholder="Sr. Martínez / Empresa XYZ"></div>
+        <div class="campo"><label>Teléfono</label><input type="text" id="cli-tel" placeholder="33 9876 5432"></div>
+        <div class="campo"><label>Fecha cotización</label><input type="date" id="cli-fecha"></div>
+        <div class="campo"><label>Fecha del servicio</label><input type="date" id="cli-fecha-servicio"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNIDAD -->
+  <div class="seccion-form">
+    <div class="seccion-form-header"><div class="sf-num">2</div><div class="sf-titulo">Unidad</div></div>
+    <div class="seccion-form-body">
+      <div class="vehiculo-cards">
+        <div class="vc activo" onclick="selVehiculo(this,'Nissan NP300 – Caja Seca','1.5 ton','np300')"><div class="vi">🚐</div><div class="vn">NP300</div><div class="vk">~1.5 ton</div></div>
+        <div class="vc" onclick="selVehiculo(this,'Ford Super Duty 5 Ton – Caja Seca','5 ton','sd')"><div class="vi">🚚</div><div class="vn">Super Duty</div><div class="vk">5 ton</div></div>
+      </div>
+      <input type="hidden" id="v-nombre" value="Nissan NP300 – Caja Seca">
+      <input type="hidden" id="v-cap" value="1.5 ton">
+      <input type="hidden" id="v-tipo" value="np300">
+    </div>
+  </div>
+
+  <!-- FLETE -->
+  <div class="seccion-form" id="sec-flete">
+    <div class="seccion-form-header"><div class="sf-num">3</div><div class="sf-titulo">Detalle del flete</div></div>
+    <div class="seccion-form-body">
+      <div class="grid-2">
+        <div class="campo"><label>Origen</label><input type="text" id="f-origen" placeholder="Col. Oblatos, GDL" oninput="recalcular()"></div>
+        <div class="campo"><label>Destino</label><input type="text" id="f-destino" placeholder="Zapopan Centro" oninput="recalcular()"></div>
+        <div class="campo"><label>Distancia</label><div class="input-u"><input type="number" id="f-km" placeholder="0" min="0" oninput="recalcular()"><span class="unidad">km</span></div></div>
+        <div class="campo"><label>Tipo de carga</label><input type="text" id="f-carga" placeholder="Muebles, mercancía..."></div>
+        <div class="campo col-full"><label>Descripción adicional</label><textarea id="f-desc" placeholder="Detalles del servicio..."></textarea></div>
+      </div>
+      <div class="calc-box">
+        <div class="calc-titulo">📊 Precio sugerido</div>
+        <div class="calc-fila"><span>Distancia</span><span class="cv" id="c-km">0 km</span></div>
+        <div class="calc-fila"><span>Tarifa/km</span><span class="cv" id="c-tar">$0</span></div>
+        <div class="calc-fila"><span>Base + margen</span><span class="cv" id="c-base">$0</span></div>
+        <div class="calc-sug"><div><div class="cs-label">Precio sugerido</div><div style="font-size:.65rem;color:#aaa">Mínimo aplicado si aplica</div></div><div class="cs-val" id="c-sug">$0</div></div>
+        <button class="btn-usar" onclick="usarSugerido('flete')">↓ Usar este precio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MUDANZA -->
+  <div class="seccion-form" id="sec-mudanza" style="display:none">
+    <div class="seccion-form-header"><div class="sf-num">3</div><div class="sf-titulo">Detalle de mudanza</div></div>
+    <div class="seccion-form-body">
+      <div class="grid-2">
+        <div class="campo"><label>Origen</label><input type="text" id="m-origen" placeholder="Dirección recogida" oninput="recalcular()"></div>
+        <div class="campo"><label>Destino</label><input type="text" id="m-destino" placeholder="Dirección entrega" oninput="recalcular()"></div>
+        <div class="campo"><label>Distancia</label><div class="input-u"><input type="number" id="m-km" placeholder="0" min="0" oninput="recalcular()"><span class="unidad">km</span></div></div>
+        <div class="campo"><label>Tamaño</label>
+          <select id="m-tam" onchange="recalcular()">
+            <option value="1">Cuarto (~2 hrs)</option>
+            <option value="2">Depto pequeño (~3 hrs)</option>
+            <option value="3">Depto grande (~5 hrs)</option>
+            <option value="4">Casa completa (~7 hrs)</option>
+          </select>
+        </div>
+        <div class="campo"><label>Cargadores</label><div class="input-u"><input type="number" id="m-carg" value="2" min="0" oninput="recalcular()"><span class="unidad">pers.</span></div></div>
+        <div class="campo"><label>Piso / acceso</label><input type="text" id="m-piso" placeholder="Piso 2 sin elevador"></div>
+        <div class="campo col-full"><label>Observaciones</label><textarea id="m-obs" placeholder="Objetos frágiles, desmontaje..."></textarea></div>
+      </div>
+      <div class="calc-box">
+        <div class="calc-titulo">📊 Precio sugerido</div>
+        <div class="calc-fila"><span>Traslado base</span><span class="cv" id="cm-flete">$0</span></div>
+        <div class="calc-fila"><span>Cargadores × horas</span><span class="cv" id="cm-carg">$0</span></div>
+        <div class="calc-fila"><span>+ margen</span><span class="cv" id="cm-sub">$0</span></div>
+        <div class="calc-sug"><div><div class="cs-label">Precio sugerido mudanza</div><div style="font-size:.65rem;color:#aaa">Todo incluido</div></div><div class="cs-val" id="cm-sug">$0</div></div>
+        <button class="btn-usar" onclick="usarSugerido('mudanza')">↓ Usar este precio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRECIO -->
+  <div class="seccion-form">
+    <div class="seccion-form-header"><div class="sf-num">4</div><div class="sf-titulo">Precio y condiciones</div></div>
+    <div class="seccion-form-body">
+      <div class="grid-3">
+        <div class="campo"><label id="lbl-flete">Costo flete</label><div class="input-u"><input type="number" id="p-flete" placeholder="0" min="0" oninput="calcTotal()"><span class="unidad">MXN</span></div></div>
+        <div class="campo"><label>Cargadores</label><div class="input-u"><input type="number" id="p-carg" placeholder="0" min="0" oninput="calcTotal()"><span class="unidad">MXN</span></div></div>
+        <div class="campo"><label>Casetas/extras</label><div class="input-u"><input type="number" id="p-cas" placeholder="0" min="0" oninput="calcTotal()"><span class="unidad">MXN</span></div></div>
+      </div>
+      <div class="total-box" style="margin-top:12px">
+        <span class="total-label">Total</span>
+        <span class="total-valor" id="total-disp">$0</span>
+      </div>
+      <div class="grid-2" style="margin-top:10px">
+        <div class="campo"><label>Condiciones de pago</label>
+          <select id="cond-pago">
+            <option>50% anticipo, 50% al entregar</option>
+            <option>Pago total al entregar</option>
+            <option>Pago total por adelantado</option>
+            <option>Pago a crédito (acordar plazo)</option>
+          </select>
+        </div>
+        <div class="campo"><label>Vigencia</label>
+          <select id="vigencia">
+            <option>3 días hábiles</option>
+            <option>5 días hábiles</option>
+            <option>7 días hábiles</option>
+            <option>15 días hábiles</option>
+          </select>
+        </div>
+      </div>
+      <div class="campo" style="margin-top:10px"><label>Notas adicionales</label><textarea id="notas" placeholder="Condiciones especiales..."></textarea></div>
+    </div>
+  </div>
+
+  <button class="btn-generar" onclick="generarCotizacion()">📄 Generar y Guardar Cotización</button>
+  <div style="height:12px"></div>
+</div>
+
+<!-- ════════════════ COTIZACIONES ════════════════ -->
+<div class="page" id="page-cots">
+  <div class="filtros" id="filtros-cots">
+    <button class="filtro-btn activo" onclick="filtrarCots('todos',this)">Todos</button>
+    <button class="filtro-btn" onclick="filtrarCots('pendiente',this)">Pendiente</button>
+    <button class="filtro-btn" onclick="filtrarCots('confirmado',this)">Confirmado</button>
+    <button class="filtro-btn" onclick="filtrarCots('en-camino',this)">En camino</button>
+    <button class="filtro-btn" onclick="filtrarCots('entregado',this)">Entregado</button>
+    <button class="filtro-btn" onclick="filtrarCots('cancelado',this)">Cancelado</button>
+  </div>
+  <div id="lista-cots"></div>
+</div>
+
+<!-- ════════════════ AGENDA ════════════════ -->
+<div class="page" id="page-agenda">
+  <div id="agenda-contenido"></div>
+</div>
+
+<!-- ════════════════ HISTORIAL ════════════════ -->
+<div class="page" id="page-historial">
+  <div id="historial-stats"></div>
+  <div style="margin-top:12px" id="historial-lista"></div>
+</div>
+
+</div><!-- /content -->
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn activo" id="nav-inicio" onclick="irA('inicio')"><span class="nav-icon">🏠</span>Inicio</button>
+  <button class="nav-btn" id="nav-nueva" onclick="irA('nueva')"><span class="nav-icon">➕</span>Nueva</button>
+  <button class="nav-btn" id="nav-cots" onclick="irA('cots')"><span class="nav-icon">📋</span>Cotizaciones</button>
+  <button class="nav-btn" id="nav-agenda" onclick="irA('agenda')"><span class="nav-icon">📅</span>Agenda</button>
+  <button class="nav-btn" id="nav-historial" onclick="irA('historial')"><span class="nav-icon">📊</span>Historial</button>
+</nav>
+
+</div><!-- /app -->
+
+<!-- MODAL COTIZACIÓN PDF -->
+<div id="modal-overlay">
+  <div id="modal-box">
+    <div id="cotizacion-preview"></div>
+    <div class="modal-actions">
+      <button class="btn-modal btn-descargar" onclick="descargarPDF()">🖨 Guardar PDF</button>
+      <button class="btn-modal btn-cerrar" onclick="cerrarModal()">✕ Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE COTIZACIÓN -->
+<div id="modal-detalle">
+  <div id="detalle-box">
+    <div id="detalle-contenido"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════
+function getCots() { try { return JSON.parse(localStorage.getItem('fmp_cots')||'[]'); } catch(e){ return []; } }
+function saveCots(arr) { localStorage.setItem('fmp_cots', JSON.stringify(arr)); }
+
+// ══════════════════════════════════════
+// NAVEGACIÓN
+// ══════════════════════════════════════
+function irA(pag) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('activa'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('activo'));
+  document.getElementById('page-'+pag).classList.add('activa');
+  document.getElementById('nav-'+pag).classList.add('activo');
+  document.getElementById('content').scrollTop=0;
+  if(pag==='inicio') renderInicio();
+  if(pag==='cots') renderCots('todos');
+  if(pag==='agenda') renderAgenda();
+  if(pag==='historial') renderHistorial();
+}
+
+// ══════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════
+function toggleConfig(){ document.getElementById('config-panel').classList.toggle('visible'); }
+function gcfg(id){ return parseFloat(document.getElementById(id).value)||0; }
+
+// ══════════════════════════════════════
+// TIPO / VEHÍCULO
+// ══════════════════════════════════════
+let tipoActual='flete', vActual='np300', folioActual='', cotActualIdx=-1;
+
+function setTipo(t){
+  tipoActual=t;
+  document.getElementById('btn-flete').classList.toggle('activo',t==='flete');
+  document.getElementById('btn-mudanza').classList.toggle('activo',t==='mudanza');
+  document.getElementById('sec-flete').style.display=t==='flete'?'':'none';
+  document.getElementById('sec-mudanza').style.display=t==='mudanza'?'':'none';
+  document.getElementById('lbl-flete').textContent=t==='flete'?'Costo flete':'Costo traslado';
+  recalcular();
+}
+
+function selVehiculo(el,nombre,cap,tipo){
+  document.querySelectorAll('.vc').forEach(c=>c.classList.remove('activo'));
+  el.classList.add('activo');
+  document.getElementById('v-nombre').value=nombre;
+  document.getElementById('v-cap').value=cap;
+  document.getElementById('v-tipo').value=tipo;
+  vActual=tipo; recalcular();
+}
+
+// ══════════════════════════════════════
+// CALCULADORA
+// ══════════════════════════════════════
+function recalcular(){
+  const tar=vActual==='np300'?gcfg('cfg-np300'):gcfg('cfg-sd');
+  const min=gcfg('cfg-min'), mp=gcfg('cfg-margen')/100;
+  if(tipoActual==='flete'){
+    const km=parseFloat(document.getElementById('f-km').value)||0;
+    const base=km*tar, conM=base*(1+mp), final=Math.max(conM,min);
+    document.getElementById('c-km').textContent=km+' km';
+    document.getElementById('c-tar').textContent='$'+tar+'/km';
+    document.getElementById('c-base').textContent=fmtN(base*(1+mp));
+    document.getElementById('c-sug').textContent=fmtN(final);
+  } else {
+    const km=parseFloat(document.getElementById('m-km').value)||0;
+    const nc=parseFloat(document.getElementById('m-carg').value)||0;
+    const hrs=[2,3,5,7][parseInt(document.getElementById('m-tam').value)-1];
+    const cc=gcfg('cfg-carg');
+    const fl=Math.max(km*tar,min), mo=nc*hrs*cc;
+    const tot=(fl+mo)*(1+mp);
+    document.getElementById('cm-flete').textContent=fmtN(fl);
+    document.getElementById('cm-carg').textContent=fmtN(mo)+' ('+nc+'×'+hrs+'h×$'+cc+')';
+    document.getElementById('cm-sub').textContent=fmtN(tot);
+    document.getElementById('cm-sug').textContent=fmtN(tot);
+  }
+}
+
+function usarSugerido(tipo){
+  const id=tipo==='flete'?'c-sug':'cm-sug';
+  const v=document.getElementById(id).textContent.replace(/[$,]/g,'');
+  document.getElementById('p-flete').value=Math.round(parseFloat(v));
+  calcTotal();
+}
+
+function calcTotal(){
+  const f=parseFloat(document.getElementById('p-flete').value)||0;
+  const c=parseFloat(document.getElementById('p-carg').value)||0;
+  const k=parseFloat(document.getElementById('p-cas').value)||0;
+  document.getElementById('total-disp').textContent='$'+(f+c+k).toLocaleString('es-MX',{minimumFractionDigits:2});
+}
+
+// ══════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════
+function fmtN(n){ return '$'+Math.round(n).toLocaleString('es-MX'); }
+function fmtMXN(n){ return '$'+(parseFloat(n)||0).toLocaleString('es-MX',{minimumFractionDigits:2}); }
+function fmtFecha(str){
+  if(!str) return '—';
+  const [y,m,d]=str.split('-');
+  const M=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return d+' '+M[parseInt(m)-1]+' '+y;
+}
+function genFolio(){
+  const d=new Date();
+  return 'COT-'+String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'-'+String(Math.floor(Math.random()*900)+100);
+}
+function statusLabel(s){
+  const m={'pendiente':'Pendiente','confirmado':'Confirmado','en-camino':'En camino','entregado':'Entregado','cancelado':'Cancelado'};
+  return m[s]||s;
+}
+
+// ══════════════════════════════════════
+// GENERAR COTIZACIÓN
+// ══════════════════════════════════════
+function generarCotizacion(){
+  const esMud=tipoActual==='mudanza';
+  const origen=esMud?(document.getElementById('m-origen').value||'—'):(document.getElementById('f-origen').value||'—');
+  const destino=esMud?(document.getElementById('m-destino').value||'—'):(document.getElementById('f-destino').value||'—');
+  const km=esMud?(document.getElementById('m-km').value||''):(document.getElementById('f-km').value||'');
+  const carga=esMud?'':(document.getElementById('f-carga').value||'');
+  const desc=esMud?(document.getElementById('m-obs').value||''):(document.getElementById('f-desc').value||'');
+  const mudExtra=esMud?(()=>{
+    const tam=['Cuarto/habitación','Depto pequeño','Depto grande','Casa completa'];
+    const idx=parseInt(document.getElementById('m-tam').value)-1;
+    const nc=document.getElementById('m-carg').value;
+    const piso=document.getElementById('m-piso').value;
+    return tam[idx]+(nc?' · '+nc+' cargadores':'')+( piso?' · '+piso:'');
+  })():'';
+  const cliNombre=document.getElementById('cli-nombre').value||'Cliente';
+  const cliTel=document.getElementById('cli-tel').value||'';
+  const cliFecha=document.getElementById('cli-fecha').value;
+  const cliFechaS=document.getElementById('cli-fecha-servicio').value;
+  const vehiculo=document.getElementById('v-nombre').value;
+  const cap=document.getElementById('v-cap').value;
+  const pflete=parseFloat(document.getElementById('p-flete').value)||0;
+  const pcarg=parseFloat(document.getElementById('p-carg').value)||0;
+  const pcas=parseFloat(document.getElementById('p-cas').value)||0;
+  const total=pflete+pcarg+pcas;
+  const condPago=document.getElementById('cond-pago').value;
+  const vig=document.getElementById('vigencia').value;
+  const notas=document.getElementById('notas').value||'';
+  folioActual=genFolio();
+
+  // Guardar en storage
+  const cots=getCots();
+  const nuevaCot={
+    folio:folioActual, tipo:tipoActual, cliente:cliNombre, tel:cliTel,
+    fechaCot:cliFecha, fechaServ:cliFechaS, vehiculo, cap,
+    origen, destino, km, carga, desc, mudExtra,
+    pflete, pcarg, pcas, total, condPago, vig, notas,
+    status:'pendiente', creado:new Date().toISOString()
+  };
+  cots.unshift(nuevaCot);
+  saveCots(cots);
+
+  mostrarPreviewPDF(nuevaCot);
+}
+
+// ══════════════════════════════════════
+// PDF PREVIEW
+// ══════════════════════════════════════
+function buildHTMLCot(c){
+  const esMud=c.tipo==='mudanza';
+  let filas='';
+  if(c.pflete>0) filas+=`<tr><td>${esMud?'Servicio de mudanza':'Servicio de flete'} – ${c.origen} → ${c.destino}${c.km?' ('+c.km+' km aprox.)':''}</td><td class="td-r">${fmtMXN(c.pflete)}</td></tr>`;
+  if(c.pcarg>0)  filas+=`<tr><td>Servicio de cargadores</td><td class="td-r">${fmtMXN(c.pcarg)}</td></tr>`;
+  if(c.pcas>0)   filas+=`<tr><td>Casetas / extras</td><td class="td-r">${fmtMXN(c.pcas)}</td></tr>`;
+  if(!filas) filas=`<tr><td colspan="2" style="color:#999;font-style:italic">Sin conceptos</td></tr>`;
+
+  return `
+    <div class="cp-header">
+      <div><div class="cp-nombre">Fletes y Mudanzas Perez</div><div class="cp-sub">${esMud?'Servicio de mudanza':'Transporte de carga'} · Caja seca</div><div class="cp-tipo">${esMud?'MUDANZA':'FLETE'}</div></div>
+      <div class="cp-badge">COTIZACIÓN<span class="num">${c.folio}</span></div>
+    </div>
+    <div class="cp-meta">
+      <div class="cp-meta-box"><div class="cp-meta-label">Cliente</div><div class="cp-meta-valor">${c.cliente}</div>${c.tel?`<div style="font-size:.72rem;color:#666;margin-top:2px">${c.tel}</div>`:''}</div>
+      <div class="cp-meta-box"><div class="cp-meta-label">Fecha cotización</div><div class="cp-meta-valor">${fmtFecha(c.fechaCot)}</div>${c.fechaServ?`<div style="font-size:.72rem;color:#666;margin-top:2px">Servicio: ${fmtFecha(c.fechaServ)}</div>`:''}</div>
+      <div class="cp-meta-box"><div class="cp-meta-label">Unidad</div><div class="cp-meta-valor">${c.vehiculo}</div><div style="font-size:.72rem;color:#666;margin-top:2px">Capacidad: ${c.cap}</div></div>
+      <div class="cp-meta-box"><div class="cp-meta-label">Ruta</div><div class="cp-meta-valor">${c.origen}</div><div style="font-size:.72rem;color:#666;margin-top:2px">→ ${c.destino}</div></div>
+    </div>
+    ${(c.carga||c.desc||c.mudExtra)?`<div class="cp-sec-titulo">Descripción</div><table class="cp-tabla"><thead><tr><th>Detalle</th></tr></thead><tbody>${c.mudExtra?`<tr><td>${c.mudExtra}</td></tr>`:''}${c.carga?`<tr><td><strong>Carga:</strong> ${c.carga}</td></tr>`:''}${c.desc?`<tr><td>${c.desc}</td></tr>`:''}</tbody></table>`:''}
+    <div class="cp-sec-titulo">Desglose de costos</div>
+    <table class="cp-tabla"><thead><tr><th style="width:75%">Concepto</th><th style="width:25%;text-align:right">Monto</th></tr></thead><tbody>${filas}<tr class="cp-total"><td>TOTAL</td><td class="td-r">${fmtMXN(c.total)}</td></tr></tbody></table>
+    <div class="cp-cond"><p><strong>Condiciones de pago:</strong> ${c.condPago}</p><p><strong>Vigencia:</strong> ${c.vig} a partir de la fecha de emisión</p>${c.notas?`<p style="margin-top:4px;color:#444">${c.notas}</p>`:''}</div>
+    <div class="cp-footer">
+      <div class="cp-contacto"><p><strong>Fletes y Mudanzas Perez</strong></p><p>📞 3319153280</p><p>📍 Guadalajara, Jal.</p></div>
+      <div class="cp-firma"><div class="cp-linea"></div><p>Firma / Autorización</p></div>
+    </div>`;
+}
+
+function mostrarPreviewPDF(cot){
+  document.getElementById('cotizacion-preview').innerHTML=buildHTMLCot(cot);
+  document.getElementById('modal-overlay').classList.add('visible');
+}
+
+function cerrarModal(){
+  document.getElementById('modal-overlay').classList.remove('visible');
+  limpiarFormulario();
+  irA('cots');
+}
+
+function descargarPDF(){
+  const c=document.getElementById('cotizacion-preview').innerHTML;
+  const v=window.open('','_blank');
+  v.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Cotizacion-${folioActual}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Barlow',sans-serif;background:#fff;color:#1a1a1a;font-size:13px}
+  #cp{padding:34px}.cp-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:14px;border-bottom:3px solid #0f0f0f;margin-bottom:18px}
+  .cp-nombre{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.5rem;text-transform:uppercase;letter-spacing:.04em;color:#0f0f0f;line-height:1.1}
+  .cp-sub{font-size:.68rem;color:#666;margin-top:3px}.cp-tipo{display:inline-block;background:#f0a500;color:#0f0f0f;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.67rem;text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;border-radius:2px;margin-top:4px}
+  .cp-badge{background:#0f0f0f;color:#f0a500;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;padding:7px 12px;border-radius:3px;text-align:right}
+  .cp-badge .num{font-size:1.1rem;display:block;margin-top:2px}.cp-meta{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px}
+  .cp-meta-box{background:#f7f7f5;border-radius:3px;padding:9px 12px;border-left:3px solid #f0a500}.cp-meta-label{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#999;margin-bottom:2px}
+  .cp-meta-valor{font-weight:600;font-size:.84rem;color:#1a1a1a}.cp-sec-titulo{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:#999;margin:14px 0 6px;padding-bottom:3px;border-bottom:1px solid #e5e5e5}
+  .cp-tabla{width:100%;border-collapse:collapse;margin-bottom:12px}.cp-tabla thead tr{background:#0f0f0f;color:#f5f5f0}
+  .cp-tabla thead th{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;padding:6px 10px;text-align:left}
+  .cp-tabla tbody tr{border-bottom:1px solid #eee}.cp-tabla tbody tr:nth-child(even){background:#fafaf8}.cp-tabla tbody td{padding:7px 10px;font-size:.8rem;vertical-align:top}
+  .td-r{text-align:right;font-weight:600;white-space:nowrap}.cp-total{background:#0f0f0f;color:#f0a500}
+  .cp-total td{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.95rem;text-transform:uppercase;letter-spacing:.05em;padding:9px 10px!important}
+  .cp-cond{background:#f7f7f5;border-radius:3px;padding:10px 12px;margin-top:12px}.cp-cond p{font-size:.73rem;color:#555;line-height:1.5;margin-bottom:2px}
+  .cp-footer{margin-top:18px;padding-top:10px;border-top:1px solid #ddd;display:flex;justify-content:space-between;align-items:flex-end}
+  .cp-contacto p{font-size:.7rem;color:#666;line-height:1.7}.cp-contacto strong{color:#0f0f0f;font-weight:600}
+  .cp-firma{text-align:right}.cp-linea{width:120px;border-top:1px solid #999;margin-bottom:3px;margin-left:auto}.cp-firma p{font-size:.65rem;color:#888}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}@page{margin:1cm;size:letter}html,body{height:auto!important}}
+  </style></head><body><div id="cp">${c}</div>
+  <script>window.onload=function(){setTimeout(function(){window.print()},600)}<\/script></body></html>`);
+  v.document.close();
+}
+
+// ══════════════════════════════════════
+// LIMPIAR FORMULARIO
+// ══════════════════════════════════════
+function limpiarFormulario(){
+  ['cli-nombre','cli-tel','cli-fecha-servicio','f-origen','f-destino','f-carga','f-desc','m-origen','m-destino','m-piso','m-obs','notas'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['f-km','m-km','p-flete','p-carg','p-cas'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('m-carg').value='2';
+  document.getElementById('total-disp').textContent='$0';
+  recalcular();
+}
+
+// ══════════════════════════════════════
+// RENDER INICIO
+// ══════════════════════════════════════
+function renderInicio(){
+  const cots=getCots();
+  const hoy=new Date().toISOString().split('T')[0];
+  const mesActual=hoy.slice(0,7);
+
+  const delMes=cots.filter(c=>c.fechaCot&&c.fechaCot.startsWith(mesActual));
+  const totalMes=delMes.reduce((a,c)=>a+c.total,0);
+  const entregados=cots.filter(c=>c.status==='entregado');
+  const totalCobrado=entregados.reduce((a,c)=>a+c.total,0);
+  const pendientes=cots.filter(c=>c.status==='pendiente'||c.status==='confirmado');
+
+  document.getElementById('resumen-stats').innerHTML=`
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-label">Cotizado este mes</div><div class="stat-val">${fmtN(totalMes)}</div><div class="stat-sub">${delMes.length} cotizaciones</div></div>
+      <div class="stat-box"><div class="stat-label">Total cobrado</div><div class="stat-val" style="color:var(--verde)">${fmtN(totalCobrado)}</div><div class="stat-sub">${entregados.length} servicios</div></div>
+      <div class="stat-box"><div class="stat-label">Pendientes</div><div class="stat-val" style="color:#5dade2">${pendientes.length}</div><div class="stat-sub">por realizar</div></div>
+      <div class="stat-box"><div class="stat-label">Total cotizaciones</div><div class="stat-val" style="color:var(--texto)">${cots.length}</div><div class="stat-sub">registradas</div></div>
+    </div>`;
+
+  const proximos=cots.filter(c=>c.fechaServ&&c.fechaServ>=hoy&&c.status!=='cancelado'&&c.status!=='entregado').sort((a,b)=>a.fechaServ.localeCompare(b.fechaServ)).slice(0,3);
+  const recientes=cots.slice(0,3);
+
+  document.getElementById('proximos-lista').innerHTML=proximos.length?proximos.map((c,i)=>buildCotItem(c,getCots().indexOf(c))).join(''):`<div style="padding:14px;text-align:center;color:var(--texto-suave);font-size:.82rem">Sin servicios próximos</div>`;
+  document.getElementById('recientes-lista').innerHTML=recientes.length?recientes.map((c,i)=>buildCotItem(c,i)).join(''):`<div style="padding:14px;text-align:center;color:var(--texto-suave);font-size:.82rem">Sin cotizaciones aún</div>`;
+}
+
+// ══════════════════════════════════════
+// RENDER COTIZACIONES
+// ══════════════════════════════════════
+let filtroActual='todos';
+function filtrarCots(f,btn){
+  filtroActual=f;
+  document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.remove('activo'));
+  if(btn) btn.classList.add('activo');
+  renderCots(f);
+}
+function renderCots(f){
+  const cots=getCots();
+  const filtradas=f==='todos'?cots:cots.filter(c=>c.status===f);
+  document.getElementById('lista-cots').innerHTML=filtradas.length?filtradas.map((c,i)=>buildCotItem(c,cots.indexOf(c))).join(''):`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-txt">No hay cotizaciones${f!=='todos'?' con estatus '+statusLabel(f):''}</div></div>`;
+}
+
+function buildCotItem(c,idx){
+  return `<div class="cot-item" onclick="abrirDetalle(${idx})">
+    <div class="cot-item-header">
+      <div class="cot-item-left">
+        <div class="cot-folio">${c.folio}</div>
+        <div class="cot-cliente">${c.cliente}</div>
+        <div class="cot-ruta">${c.origen} → ${c.destino}</div>
+      </div>
+      <div class="cot-item-right">
+        <div class="cot-monto">${fmtMXN(c.total)}</div>
+        <div class="cot-fecha">${fmtFecha(c.fechaCot)}</div>
+      </div>
+    </div>
+    <div class="cot-item-footer">
+      <span class="badge-tipo">${c.tipo==='mudanza'?'🏠 Mudanza':'📦 Flete'}</span>
+      <span class="badge-status s-${c.status}">${statusLabel(c.status)}</span>
+      ${c.fechaServ?`<span style="font-size:.65rem;color:var(--texto-suave);margin-left:auto">📅 ${fmtFecha(c.fechaServ)}</span>`:''}
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════
+// DETALLE COTIZACIÓN
+// ══════════════════════════════════════
+function abrirDetalle(idx){
+  const cots=getCots();
+  const c=cots[idx];
+  if(!c) return;
+  cotActualIdx=idx;
+
+  const statusBtns=['pendiente','confirmado','en-camino','entregado','cancelado'].map(s=>`
+    <button class="ss-btn ${c.status===s?'sel-'+s:''}" onclick="cambiarStatus(${idx},'${s}',this)">${statusLabel(s)}</button>`).join('');
+
+  document.getElementById('detalle-contenido').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+      <div><div class="det-titulo">${c.cliente}</div><div class="det-folio">${c.folio} · ${c.tipo==='mudanza'?'🏠 Mudanza':'📦 Flete'}</div></div>
+      <span class="badge-status s-${c.status}" style="font-size:.75rem;padding:4px 10px">${statusLabel(c.status)}</span>
+    </div>
+    <div class="det-fila"><span class="det-key">Teléfono</span><span class="det-val">${c.tel||'—'}</span></div>
+    <div class="det-fila"><span class="det-key">Fecha cotización</span><span class="det-val">${fmtFecha(c.fechaCot)}</span></div>
+    <div class="det-fila"><span class="det-key">Fecha servicio</span><span class="det-val">${c.fechaServ?fmtFecha(c.fechaServ):'—'}</span></div>
+    <div class="det-fila"><span class="det-key">Ruta</span><span class="det-val">${c.origen} → ${c.destino}</span></div>
+    <div class="det-fila"><span class="det-key">Unidad</span><span class="det-val">${c.vehiculo}</span></div>
+    ${c.km?`<div class="det-fila"><span class="det-key">Distancia</span><span class="det-val">${c.km} km</span></div>`:''}
+    <div class="det-fila"><span class="det-key">Total</span><span class="det-val" style="color:var(--acento);font-size:1.1rem">${fmtMXN(c.total)}</span></div>
+    <div class="det-fila"><span class="det-key">Pago</span><span class="det-val">${c.condPago}</span></div>
+    <div style="margin-top:14px;margin-bottom:6px;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--texto-suave)">Cambiar estatus</div>
+    <div class="status-selector">${statusBtns}</div>
+    <button class="btn-det-pdf" onclick="reimprimir(${idx})">🖨 Ver / Imprimir cotización</button>
+    <button class="btn-det-cerrar" onclick="cerrarDetalle()">✕ Cerrar</button>
+    <button class="btn-det-eliminar" onclick="eliminarCot(${idx})">🗑 Eliminar cotización</button>`;
+
+  document.getElementById('modal-detalle').classList.add('visible');
+}
+
+function cambiarStatus(idx,nuevoStatus,btn){
+  const cots=getCots();
+  cots[idx].status=nuevoStatus;
+  saveCots(cots);
+  // actualizar botones
+  document.querySelectorAll('.ss-btn').forEach(b=>{
+    ['pendiente','confirmado','en-camino','entregado','cancelado'].forEach(s=>b.classList.remove('sel-'+s));
+  });
+  btn.classList.add('sel-'+nuevoStatus);
+  // actualizar badge en header
+  const badge=document.querySelector('#detalle-contenido .badge-status');
+  if(badge){ badge.className='badge-status s-'+nuevoStatus; badge.textContent=statusLabel(nuevoStatus); }
+}
+
+function cerrarDetalle(){
+  document.getElementById('modal-detalle').classList.remove('visible');
+  renderCots(filtroActual);
+  renderInicio();
+}
+
+function reimprimir(idx){
+  const cots=getCots();
+  folioActual=cots[idx].folio;
+  document.getElementById('cotizacion-preview').innerHTML=buildHTMLCot(cots[idx]);
+  document.getElementById('modal-detalle').classList.remove('visible');
+  document.getElementById('modal-overlay').classList.add('visible');
+}
+
+function eliminarCot(idx){
+  if(!confirm('¿Eliminar esta cotización?')) return;
+  const cots=getCots();
+  cots.splice(idx,1);
+  saveCots(cots);
+  cerrarDetalle();
+}
+
+// ══════════════════════════════════════
+// AGENDA
+// ══════════════════════════════════════
+function renderAgenda(){
+  const cots=getCots();
+  const hoy=new Date().toISOString().split('T')[0];
+  const conFecha=cots.filter(c=>c.fechaServ).sort((a,b)=>a.fechaServ.localeCompare(b.fechaServ));
+
+  if(!conFecha.length){
+    document.getElementById('agenda-contenido').innerHTML=`<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-txt">No hay servicios agendados</div></div>`;
+    return;
+  }
+
+  const grupos={};
+  conFecha.forEach(c=>{
+    if(!grupos[c.fechaServ]) grupos[c.fechaServ]=[];
+    grupos[c.fechaServ].push(c);
+  });
+
+  let html='';
+  Object.keys(grupos).sort().forEach(fecha=>{
+    const esHoy=fecha===hoy;
+    const esPasado=fecha<hoy;
+    html+=`<div class="agenda-dia">
+      <div class="agenda-fecha-label ${esHoy?'hoy':''}">${esHoy?'📍 HOY – ':esPasado?'✓ ':'📅 '}${fmtFecha(fecha)}</div>
+      ${grupos[fecha].map(c=>buildCotItem(c,cots.indexOf(c))).join('')}
+    </div>`;
+  });
+
+  document.getElementById('agenda-contenido').innerHTML=html;
+}
+
+// ══════════════════════════════════════
+// HISTORIAL
+// ══════════════════════════════════════
+function renderHistorial(){
+  const cots=getCots();
+  const entregados=cots.filter(c=>c.status==='entregado');
+  const totalCobrado=entregados.reduce((a,c)=>a+c.total,0);
+  const totalCotizado=cots.reduce((a,c)=>a+c.total,0);
+  const fletes=cots.filter(c=>c.tipo==='flete').length;
+  const mudanzas=cots.filter(c=>c.tipo==='mudanza').length;
+  const promedio=cots.length?totalCotizado/cots.length:0;
+
+  document.getElementById('historial-stats').innerHTML=`
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-label">Total cobrado</div><div class="stat-val" style="color:var(--verde)">${fmtN(totalCobrado)}</div><div class="stat-sub">${entregados.length} servicios</div></div>
+      <div class="stat-box"><div class="stat-label">Total cotizado</div><div class="stat-val">${fmtN(totalCotizado)}</div><div class="stat-sub">${cots.length} cotizaciones</div></div>
+      <div class="stat-box"><div class="stat-label">Ticket promedio</div><div class="stat-val" style="color:#5dade2">${fmtN(promedio)}</div><div class="stat-sub">por servicio</div></div>
+      <div class="stat-box"><div class="stat-label">Fletes / Mudanzas</div><div class="stat-val" style="color:var(--texto);font-size:1.1rem">${fletes} / ${mudanzas}</div><div class="stat-sub">servicios</div></div>
+    </div>`;
+
+  const porMes={};
+  cots.forEach(c=>{ if(c.fechaCot){ const m=c.fechaCot.slice(0,7); if(!porMes[m]) porMes[m]={total:0,count:0}; porMes[m].total+=c.total; porMes[m].count++; } });
+  const meses=Object.keys(porMes).sort().reverse();
+
+  const mesesNom=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  let htmlMes=meses.map(m=>{
+    const [y,mo]=m.split('-');
+    return `<div class="cot-item" style="cursor:default">
+      <div class="cot-item-header">
+        <div class="cot-item-left"><div class="cot-folio">${mesesNom[parseInt(mo)-1]} ${y}</div><div class="cot-cliente">${porMes[m].count} cotizaciones</div></div>
+        <div class="cot-item-right"><div class="cot-monto">${fmtMXN(porMes[m].total)}</div></div>
+      </div></div>`;
+  }).join('');
+
+  document.getElementById('historial-lista').innerHTML=meses.length?`
+    <div class="card-header" style="background:var(--gris-medio);border-radius:5px 5px 0 0;border:1px solid var(--linea);border-bottom:none;padding:9px 14px">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.06em">📆 Por mes</span>
+    </div>
+    <div style="border:1px solid var(--linea);border-top:none;border-radius:0 0 5px 5px;overflow:hidden">${htmlMes}</div>`:`<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-txt">Aún no hay datos</div></div>`;
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+document.getElementById('cli-fecha').value=new Date().toISOString().split('T')[0];
+recalcular();
+renderInicio();
+
+document.getElementById('modal-overlay').addEventListener('click',function(e){ if(e.target===this) cerrarModal(); });
+document.getElementById('modal-detalle').addEventListener('click',function(e){ if(e.target===this) cerrarDetalle(); });
+</script>
+</body>
+</html>
